@@ -1,18 +1,28 @@
 const path = require('path')
+const createVueLoaderOptions = require('./vue-loader.config')
+
 const isDev = process.env.NODE_ENV === 'development'
 
 const config = {
   target: 'web',
-  entry: path.join(__dirname, '../src/index.js'),
+  entry: path.join(__dirname, '../client/client-entry.js'),
   output: {
     filename: 'bundle.[hash:8].js',
-    path: path.join(__dirname, 'dist')
+    path: path.join(__dirname, '../public'),
+    publicPath: 'http://127.0.0.1:8000/public/'
   },
   module: {
     rules: [
       {
+        test: /\.(vue|js|jsx)$/,
+        loader: 'eslint-loader',
+        exclude: /node_modules/,
+        enforce: 'pre'
+      },
+      {
         test: /\.vue$/,
-        loader: 'vue-loader'
+        loader: 'vue-loader',
+        options: createVueLoaderOptions(isDev)
       },
       {
         test: /\.jsx$/,
@@ -21,8 +31,7 @@ const config = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        // 不编译node_modules里的js文件
-        exclude: /node_modules/ 
+        exclude: /node_modules/
       },
       {
         test: /\.(gif|jpg|jpeg|png|svg)$/,
@@ -31,12 +40,13 @@ const config = {
             loader: 'url-loader',
             options: {
               limit: 1024,
-              name: 'resources/[path][name]-aaa.[ext]'
+              name: 'resources/[path][name].[hash:8].[ext]'
             }
           }
         ]
       }
     ]
-  },
+  }
 }
+
 module.exports = config
